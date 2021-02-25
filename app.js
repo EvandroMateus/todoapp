@@ -1,6 +1,7 @@
 class Todo{
     constructor(task){
         this.task = task;
+        this.completed = false;
     }
 }
 
@@ -20,45 +21,51 @@ class UI{
             <li class="todo-item">${todo.task}</li>
             <button class="complete-btn"><i class="fas fa-check"></i></button>
             <button class="delete-btn"><i class="fas fa-trash"></i></button>
-        `
+        `;
+
+        if(todo.completed && !todoItem.classList.contains('completed')){
+            todoItem.classList.add('completed');
+        }
 
         list.appendChild(todoItem);
     }
 
     static filterTodos(e){
-        const list = document.querySelector('.todo-list').childNodes
+        const list = document.querySelector('.todo-list').childNodes;
         list.forEach(todo => {
             switch(e.target.value){
                 case "all":
                     todo.style.display = 'flex';
-                    break
+                    break;
                 case "completed":
                     if(todo.classList.contains('completed')){
                         todo.style.display = 'flex'
                     }else{
                         todo.style.display = 'none'
                     }
-                    break
+                    break;
                 case "uncompleted":
                     if(!todo.classList.contains('completed')){
                         todo.style.display = 'flex'
                     }else{
                         todo.style.display = 'none'
                     }
-                    break
+                    break;
             }
         })
     }
 
     static completeTodo(el){
+        const todos = Store.getTodos();
         const todo = el.parentElement;
         todo.classList.toggle('completed');
+        Store.completeTodo(todo);
     }
 
     static deleteTodo(el){
         const todo = el.parentElement;
         todo.classList.add('fall');
-        todo.addEventListener('transitionend', () => todo.remove())
+        todo.addEventListener('transitionend', () => todo.remove());
         Store.removeTodo(todo);
     }
 }
@@ -82,8 +89,17 @@ class Store{
         localStorage.setItem('todos', JSON.stringify(todos));
     }
 
-    static completeTodo(){
-        
+    static completeTodo(todo){
+        const todos = Store.getTodos();
+        const todoItem = todo.children[0].textContent;
+
+        todos.forEach((todo, index) => {
+            if(todo.task === todoItem){
+                todos[index].completed = !todos[index].completed;
+            }
+        })
+
+        localStorage.setItem('todos', JSON.stringify(todos));
     }
 
     static removeTodo(todo){
